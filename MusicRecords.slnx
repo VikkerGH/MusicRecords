@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="BackendMusicRecords.API/BackendMusicRecords.API.csproj" />
+  <Project Path="MusicRecords.Tests/MusicRecords.Tests.csproj" />
 </Solution>
