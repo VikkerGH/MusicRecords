@@ -9,18 +9,18 @@ public class MusicRecordsRepository
         new MusicRecord
         {
             Id = 1,
-            Title = "Discovery",
-            Artist = "Daft Punk",
+            Title = "Ta på mine frugter",
+            Artist = "Appelsinsovs",
             Duration = 3660,
-            PublicationYear = 2001
+            PublicationYear = 2025
         },
         new MusicRecord
         {
             Id = 2,
-            Title = "Abbey Road",
-            Artist = "The Beatles",
+            Title = "Citrusdrømme",
+            Artist = "Appelsinsovs",
             Duration = 2823,
-            PublicationYear = 1969
+            PublicationYear = 2026
         }
     };
 
