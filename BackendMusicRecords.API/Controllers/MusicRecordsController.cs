@@ -19,8 +19,10 @@ public class MusicRecordsController : ControllerBase
     [ProducesResponseType(
         typeof(List<MusicRecord>),
         StatusCodes.Status200OK)]
-    public ActionResult<List<MusicRecord>> GetAll()
+    public ActionResult<List<MusicRecord>> GetAll(
+        [FromQuery] string? title,
+        [FromQuery] string? artist)
     {
-        return Ok(_repository.GetAll());
+        return Ok(_repository.GetAll(title, artist));
     }
 }
