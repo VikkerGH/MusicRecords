@@ -274,13 +274,215 @@
           }
         }
       ]
+    },
+    {
+      "name": "Login som User – korrekt login og lokalt token",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{userUsername}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Statuskode er 200', function () {",
+            "    pm.response.to.have.status(200);",
+            "});",
+            "pm.test('Content-Type indeholder application/json', function () {",
+            "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+            "});",
+            "pm.test('User-svaret er korrekt uden hemmeligheder, og token gemmes lokalt', function () {",
+            "    pm.response.to.have.status(200);",
+            "    const data = pm.response.json();",
+            "    pm.expect(data).to.have.all.keys('token', 'expiresAtUtc', 'username', 'role');",
+            "    pm.expect(data.username).to.eql(pm.variables.get('userUsername'));",
+            "    pm.expect(data.role).to.eql('User');",
+            "    pm.expect(data.token).to.be.a('string').and.not.empty;",
+            "    pm.expect(data.token.split('.')).to.have.lengthOf(3);",
+            "    pm.expect(data.expiresAtUtc).to.be.a('string').and.match(/Z$/);",
+            "    pm.expect(Date.parse(data.expiresAtUtc)).to.be.within(Date.now() + 29 * 60 * 1000, Date.now() + 31 * 60 * 1000);",
+            "    pm.variables.set('token', data.token);",
+            "});"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Login som Admin – korrekt login og lokalt token",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Statuskode er 200', function () {",
+            "    pm.response.to.have.status(200);",
+            "});",
+            "pm.test('Content-Type indeholder application/json', function () {",
+            "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+            "});",
+            "pm.test('Admin-svaret er korrekt uden hemmeligheder, og token gemmes lokalt', function () {",
+            "    pm.response.to.have.status(200);",
+            "    const data = pm.response.json();",
+            "    pm.expect(data).to.have.all.keys('token', 'expiresAtUtc', 'username', 'role');",
+            "    pm.expect(data.username).to.eql(pm.variables.get('adminUsername'));",
+            "    pm.expect(data.role).to.eql('Admin');",
+            "    pm.expect(data.token).to.be.a('string').and.not.empty;",
+            "    pm.expect(data.token.split('.')).to.have.lengthOf(3);",
+            "    pm.expect(data.expiresAtUtc).to.be.a('string').and.match(/Z$/);",
+            "    pm.expect(Date.parse(data.expiresAtUtc)).to.be.within(Date.now() + 29 * 60 * 1000, Date.now() + 31 * 60 * 1000);",
+            "    pm.variables.set('token', data.token);",
+            "});"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Login med forkert adgangskode – generel fejl",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{userUsername}}\",\n  \"password\": \"{{invalidPassword}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Statuskode er 401', function () {",
+            "    pm.response.to.have.status(401);",
+            "});",
+            "pm.test('Content-Type indeholder application/json', function () {",
+            "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+            "});",
+            "pm.test('Forkert adgangskode giver generel fejl uden token eller hemmeligheder', function () {",
+            "    const data = pm.response.json();",
+            "    pm.expect(data).to.have.all.keys('message');",
+            "    pm.expect(data.message).to.eql('Forkert brugernavn eller adgangskode.');",
+            "});"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Login med ukendt bruger – samme generelle fejl",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{unknownUsername}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Statuskode er 401', function () {",
+            "    pm.response.to.have.status(401);",
+            "});",
+            "pm.test('Content-Type indeholder application/json', function () {",
+            "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+            "});",
+            "pm.test('Ukendt bruger giver samme generelle fejl uden token eller hemmeligheder', function () {",
+            "    const data = pm.response.json();",
+            "    pm.expect(data).to.have.all.keys('message');",
+            "    pm.expect(data.message).to.eql('Forkert brugernavn eller adgangskode.');",
+            "});"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Login uden felter – valideringsfejl",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Statuskode er 400', function () {",
+            "    pm.response.to.have.status(400);",
+            "});",
+            "pm.test('Content-Type indeholder application/problem+json', function () {",
+            "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+            "});",
+            "pm.test('Manglende brugernavn og adgangskode giver valideringsfejl uden token', function () {",
+            "    const data = pm.response.json();",
+            "    pm.expect(data.status).to.eql(400);",
+            "    pm.expect(data.errors).to.be.an('object');",
+            "    pm.expect(Object.keys(data.errors).map(key => key.toLowerCase())).to.include.members(['username', 'password']);",
+            "    pm.expect(data).not.to.have.property('token');",
+            "    pm.expect(data).not.to.have.property('password');",
+            "    pm.expect(data).not.to.have.property('passwordHash');",
+            "});"
+          ]
+        }
+      }]
     }
   ],
+  "event": [{
+    "listen": "prerequest",
+    "script": {
+      "type": "text/javascript",
+      "exec": [
+        "if (pm.request.method === 'POST' && pm.request.body && pm.request.body.mode === 'raw') {",
+        "    const body = JSON.parse(pm.request.body.raw);",
+        "    ['username', 'password'].forEach(function (field) {",
+        "        if (typeof body[field] === 'string') {",
+        "            const variable = /^\\{\\{(\\w+)\\}\\}$/.exec(body[field]);",
+        "            if (variable) body[field] = pm.variables.get(variable[1]) || '';",
+        "        }",
+        "    });",
+        "    pm.request.body.update(JSON.stringify(body));",
+        "}"
+      ]
+    }
+  }],
   "variable": [
     {
       "key": "baseUrl",
       "value": "https://localhost:7297",
       "type": "string"
-    }
+    },
+    { "key": "userUsername", "value": "", "type": "string" },
+    { "key": "userPassword", "value": "", "type": "string" },
+    { "key": "adminUsername", "value": "", "type": "string" },
+    { "key": "adminPassword", "value": "", "type": "string" },
+    { "key": "invalidPassword", "value": "", "type": "string" },
+    { "key": "unknownUsername", "value": "", "type": "string" }
   ]
 }
