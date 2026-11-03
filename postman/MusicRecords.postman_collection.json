@@ -6,7 +6,7 @@
   },
   "item": [
     {
-      "name": "Get all music records",
+      "name": "Hent alle plader uden filtre",
       "request": {
         "method": "GET",
         "header": [],
@@ -18,15 +18,23 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Status code is 200', function () {",
+              "pm.test('Statuskode er 200', function () {",
               "    pm.response.to.have.status(200);",
               "});",
               "",
-              "pm.test('Content type is JSON', function () {",
+              "pm.test('Content-Type indeholder application/json', function () {",
               "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
               "});",
               "",
-              "pm.test('Response contains the expected records by ID', function () {",
+              "pm.test('Svaret er et array', function () {",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Svaret indeholder præcis 2 plader', function () {",
+              "    pm.expect(pm.response.json()).to.have.lengthOf(2);",
+              "});",
+              "",
+              "pm.test('Begge eksempelplader har forventede id’er og feltværdier', function () {",
               "    const records = pm.response.json();",
               "    pm.expect(records).to.be.an('array').with.lengthOf(2);",
               "",
@@ -43,6 +51,218 @@
               "    const secondRecord = records.find(record => record.id === 2);",
               "    pm.expect(secondRecord).to.exist;",
               "    pm.expect(secondRecord).to.include({",
+              "        id: 2,",
+              "        title: 'Citrusdrømme',",
+              "        artist: 'Appelsinsovs',",
+              "        duration: 2823,",
+              "        publicationYear: 2026",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Søg på titel Citrus – kun Citrusdrømme",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/records?title=Citrus"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Statuskode er 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Content-Type indeholder application/json', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "pm.test('Svaret er et array', function () {",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Svaret indeholder præcis 1 plade', function () {",
+              "    pm.expect(pm.response.json()).to.have.lengthOf(1);",
+              "});",
+              "",
+              "pm.test('Citrusdrømme har id 2 og forventede feltværdier', function () {",
+              "    const record = pm.response.json().find(record => record.id === 2);",
+              "    pm.expect(record).to.exist;",
+              "    pm.expect(record).to.include({",
+              "        id: 2,",
+              "        title: 'Citrusdrømme',",
+              "        artist: 'Appelsinsovs',",
+              "        duration: 2823,",
+              "        publicationYear: 2026",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Søg på kunstner Appelsin – begge eksempelplader",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/records?artist=Appelsin"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Statuskode er 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Content-Type indeholder application/json', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "pm.test('Svaret er et array', function () {",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Svaret indeholder præcis 2 plader', function () {",
+              "    pm.expect(pm.response.json()).to.have.lengthOf(2);",
+              "});",
+              "",
+              "pm.test('Begge eksempelplader har forventede id’er og feltværdier', function () {",
+              "    const records = pm.response.json();",
+              "    const firstRecord = records.find(record => record.id === 1);",
+              "    pm.expect(firstRecord).to.exist;",
+              "    pm.expect(firstRecord).to.include({",
+              "        id: 1,",
+              "        title: 'Ta på mine frugter',",
+              "        artist: 'Appelsinsovs',",
+              "        duration: 3660,",
+              "        publicationYear: 2025",
+              "    });",
+              "",
+              "    const secondRecord = records.find(record => record.id === 2);",
+              "    pm.expect(secondRecord).to.exist;",
+              "    pm.expect(secondRecord).to.include({",
+              "        id: 2,",
+              "        title: 'Citrusdrømme',",
+              "        artist: 'Appelsinsovs',",
+              "        duration: 2823,",
+              "        publicationYear: 2026",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Søg på titel Citrus og kunstner Ukendt – tom liste (AND)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/records?title=Citrus&artist=Ukendt"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Statuskode er 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Content-Type indeholder application/json', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "pm.test('Svaret er et array', function () {",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('AND-filtrene giver præcis 0 plader', function () {",
+              "    pm.expect(pm.response.json()).to.have.lengthOf(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Søg på titel Ukendt – tom liste",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/records?title=Ukendt"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Statuskode er 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Content-Type indeholder application/json', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "pm.test('Svaret er et array', function () {",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Ukendt titel giver præcis 0 plader', function () {",
+              "    pm.expect(pm.response.json()).to.have.lengthOf(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Søg på titel citrus – uden forskel på store og små bogstaver",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/records?title=citrus"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Statuskode er 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Content-Type indeholder application/json', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "pm.test('Svaret er et array', function () {",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Søgning med små bogstaver giver præcis 1 plade', function () {",
+              "    pm.expect(pm.response.json()).to.have.lengthOf(1);",
+              "});",
+              "",
+              "pm.test('Citrusdrømme har id 2 og forventede feltværdier', function () {",
+              "    const record = pm.response.json().find(record => record.id === 2);",
+              "    pm.expect(record).to.exist;",
+              "    pm.expect(record).to.include({",
               "        id: 2,",
               "        title: 'Citrusdrømme',",
               "        artist: 'Appelsinsovs',",

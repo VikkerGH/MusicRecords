@@ -24,8 +24,22 @@ public class MusicRecordsRepository
         }
     };
 
-    public List<MusicRecord> GetAll()
+    public List<MusicRecord> GetAll(string? title = null, string? artist = null)
     {
-        return new List<MusicRecord>(_records);
+        List<MusicRecord> records = new(_records);
+
+        if (title != null)
+        {
+            records = records.FindAll(record =>
+                record.Title.StartsWith(title, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (artist != null)
+        {
+            records = records.FindAll(record =>
+                record.Artist.StartsWith(artist, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return records;
     }
 }

@@ -42,4 +42,38 @@ public class MusicRecordsRepositoryTests
 
         Assert.Equal(2, repository.GetAll().Count);
     }
+
+    [Fact]
+    public void GetAll_WithTitle_ReturnsMatchingRecords()
+    {
+        var repository = new MusicRecordsRepository();
+
+        var records = repository.GetAll(title: "Citrus");
+
+        var record = Assert.Single(records);
+        Assert.Equal("Citrusdrømme", record.Title);
+    }
+
+    [Fact]
+    public void GetAll_WithArtist_ReturnsMatchingRecords()
+    {
+        var repository = new MusicRecordsRepository();
+
+        var records = repository.GetAll(artist: "Ukendt");
+
+        Assert.Empty(records);
+    }
+
+    [Fact]
+    public void GetAll_WithTitleAndArtist_FiltersByBoth()
+    {
+        var repository = new MusicRecordsRepository();
+
+        var records = repository.GetAll(title: "Citrus", artist: "Appelsin");
+
+        var record = Assert.Single(records);
+        Assert.Equal("Citrusdrømme", record.Title);
+        Assert.Equal("Appelsinsovs", record.Artist);
+    }
 }
+
