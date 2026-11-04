@@ -79,12 +79,19 @@ Korrekt login returnerer kun `token`, `expiresAtUtc`, `username` og `role`. Fork
 
 Ved korrekt login kontrolleres JWT-format, bruger/rolle og UTC-udløb omkring 30 minutter frem (med et minuts tolerance i Postman); derefter gemmes `token` med `pm.variables.set`. Variablen er **runtime-lokal**, ikke eksporteret eller delt. Den kan bruges som **Bearer Token** `{{token}}` i senere requests i **samme Collection Runner-kørsel**. Admin-login overskriver User-tokenet, når begge køres. Ved enkeltstående **Send** findes variablen kun i denne request-kørsel; til senere separate Send-requests kan tokenet kopieres til en lokal environment-variabel `token`, som slettes efter brug og aldrig deles/eksporteres. De eksisterende GET-requests kræver fortsat intet token.
 
-## Kør alle HTTP-requests og tests samlet
+## Kør alle HTTP-requests og tests i to kørsler
 
-1. Start API'et som beskrevet ovenfor, og lad det køre under hele testen.
+Collectionen indeholder **25 requests og 62 tests**. Kør først de 11 eksisterende requests og derefter oprettelsesmappens 14 requests:
+
+1. Start API'et som beskrevet ovenfor med de to oprindelige eksempelplader, og lad det køre under begge kørsler.
 2. Åbn menuen ved collectionen **MusicRecords**, og vælg **Run collection**.
-3. Vælg det udfyldte lokale environment, markér alle **11 requests** i Collection Runner, og vælg én iteration.
-4. Tryk **Run MusicRecords**, og kontrollér, at alle **43 tests** består i kørselsoversigten: de oprindelige 28 søgetests og 15 logintests.
+3. Vælg det udfyldte lokale environment og én iteration. Markér kun de **11 eksisterende requests** i collectionens rod; fravælg mappen **Oprettelse af plader – kør sidst**.
+4. Tryk **Run MusicRecords**, og kontrollér, at alle **43 tests** består: 28 liste-/søgetests og 15 logintests.
+5. Start derefter en ny Runner-kørsel med samme lokale environment og én iteration. Markér kun hele mappen **Oprettelse af plader – kør sidst**, og kør dens **14 requests i den eksisterende rækkefølge**. Kontrollér, at alle **19 tests** består.
+
+Oprettelsesmappen logger selv ind som Admin og User og gemmer sine tokens runtime-lokalt i denne kørsel. Den kontrollerer gyldig Admin-oprettelse (201), offentlig søgning efter den oprettede plade, ugyldige data (400), manglende token (401), User uden Admin-rolle (403) og til sidst, at listen kun indeholder de to eksempelplader og den ene godkendte oprettelse.
+
+**Stop og start API'et før en ny samlet kørsel af begge dele.** Oprettelsen ændrer listen i hukommelsen, og genstart gendanner de to eksempelplader. Genstart ikke mellem de to kørsler ovenfor, og opret ikke ekstra plader undervejs. Der bruges hverken reset- eller slettefunktion.
 
 Den oprindelige request uden filtre er bevaret med navnet **Hent alle plader uden filtre**. En enkelt request kan også køres med **Send**; resultaterne vises under **Test Results**.
 
@@ -108,7 +115,9 @@ Søgningen matcher begyndelsen af titel og kunstner uden forskel på store og sm
 
 ## Logout og afgrænsning
 
-Der er intet logout-endpoint. Den kommende frontend logger ud ved at fjerne sit token. Et allerede udstedt token forbliver gyldigt indtil udløbet efter 30 minutter, også hvis det kopieres før logout. Token-revocation, registrering, database, brugeradministration og ændring af musikplader er uden for denne delopgave.
+Login og logout er implementeret i frontend. Logout sker ved at fjerne tokenet i frontend; der er intet logout-endpoint. Et allerede udstedt token forbliver gyldigt indtil udløbet efter 30 minutter, også hvis det kopieres før logout.
+
+Oprettelse af musikplader er implementeret via **POST /api/records** og kræver Admin-rollen. Pladerne gemmes kun i hukommelsen. Sletning, opdatering, database og Azure er ikke implementeret. Token-revocation, registrering og brugeradministration er heller ikke implementeret.
 
 ## Byg og kør unit tests
 
