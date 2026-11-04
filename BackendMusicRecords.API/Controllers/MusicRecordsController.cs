@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MusicRecords.Api.Models;
 using MusicRecords.Api.Repositories;
 
@@ -24,5 +25,24 @@ public class MusicRecordsController : ControllerBase
         [FromQuery] string? artist)
     {
         return Ok(_repository.GetAll(title, artist));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(MusicRecord), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public ActionResult<MusicRecord> Add([FromBody] CreateMusicRecordRequest request)
+    {
+        var created = _repository.Add(new MusicRecord
+        {
+            Title = request.Title,
+            Artist = request.Artist,
+            Duration = request.Duration,
+            PublicationYear = request.PublicationYear
+        });
+
+        return StatusCode(StatusCodes.Status201Created, created);
     }
 }
